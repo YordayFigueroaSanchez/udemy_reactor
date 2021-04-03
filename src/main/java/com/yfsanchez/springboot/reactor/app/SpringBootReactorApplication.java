@@ -6,6 +6,8 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import com.yfsanchez.springboot.reactor.app.models.Usuario;
+
 import reactor.core.publisher.Flux;
 
 @SpringBootApplication
@@ -18,21 +20,23 @@ public class SpringBootReactorApplication implements CommandLineRunner{
 
 	@Override
 	public void run(String... args) throws Exception {
-		Flux<String> nombres = Flux.just("Nombre01","Nombre02","Nombre2.5","Nombre03","Nombre04")
+		Flux<Usuario> nombres = Flux.just("Nombre01","Nombre02","Nombre2.5","Nombre03","Nombre04")
 				.map(nombre -> {
-					return nombre.toUpperCase();
+					return new Usuario(nombre.toUpperCase(), null);
 				})
-				.doOnNext(nombre -> {
-					if (nombre.isEmpty()) {
+				.doOnNext(usuario -> {
+					if (usuario == null) {
 						throw new RuntimeException("No se permite vacios.");
 					}
-					System.out.println(nombre);
+					System.out.println(usuario.getNombre());
 					})
-				.map(nombre -> {
-					return nombre.toLowerCase();
+				.map(usuario -> {
+					String nombre = usuario.getNombre();
+					usuario.setNombre(nombre.toLowerCase());
+					return usuario;
 				});
 		
-		nombres.subscribe(e -> log.info(e),
+		nombres.subscribe(e -> log.info(e.toString()),
 				error -> log.error(error.getMessage()),
 				new Runnable() {
 					
